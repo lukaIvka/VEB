@@ -1,16 +1,21 @@
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using Microsoft.ServiceFabric.Services.Runtime;
 using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
+
 namespace TaxiAppWebApi
 {
     internal static class Program
     {
-        /// <summary>
-        /// This is the entry point of the service host process.
-        /// </summary>
         private static void Main()
         {
             try
@@ -25,7 +30,9 @@ namespace TaxiAppWebApi
 
                 ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(TaxiAppWebApi).Name);
 
-                // Prevents this host process from terminating so services keeps running. 
+                CreateHostBuilder().Build().Run();
+
+                // Prevents this host process from terminating so services keep running. 
                 Thread.Sleep(Timeout.Infinite);
             }
             catch (Exception e)
@@ -34,5 +41,13 @@ namespace TaxiAppWebApi
                 throw;
             }
         }
+
+        public static IHostBuilder CreateHostBuilder() =>
+            Host.CreateDefaultBuilder()
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
     }
+
 }
