@@ -1,31 +1,27 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using TaxiAppWebApi.Data;
 
 
 public class Startup
 {
+    public IConfiguration Configuration { get; }
     public Startup(IConfiguration configuration)
     {
         Configuration = configuration;
     }
 
-    public IConfiguration Configuration { get; }
 
     // This method gets called by the runtime. Use this method to add services to the container.
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddControllers();
         services.AddDbContext<TaxiAppDbContext>(options =>
-        options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+         options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
+        services.AddControllers();
         // Add Swagger services
         services.AddSwaggerGen(c =>
         {
