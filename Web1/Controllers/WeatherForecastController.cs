@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace TaxiAppWebApi.Controllers
+namespace Web1.Controllers
 {
     [ApiController]
     [Route("[controller]")]

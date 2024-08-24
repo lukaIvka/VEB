@@ -10,13 +10,14 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 
 
 namespace TaxiAppWebApi
 {
     internal static class Program
     {
-        private static void Main()
+        private static void Main(string[] args)
         {
             try
             {
@@ -30,8 +31,25 @@ namespace TaxiAppWebApi
 
                 ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(TaxiAppWebApi).Name);
 
-                CreateHostBuilder().Build().Run();
+                CreateHostBuilder(args).Build().Run();
 
+                //ovo sve treba iznad u try catch
+                string connectionString = "Server=DESKTOP-5D75IDE\\SQLEXPRESS;Database=TaxiAppDb;Trusted_Connection=True;TrustServerCertificate=True;Encrypt=False;MultipleActiveResultSets=true;";
+                string query = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'";
+
+                using (var connection = new SqlConnection(connectionString))
+                {
+                    SqlCommand command = new SqlCommand(query, connection);
+                    connection.Open();
+
+                    using (var reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Console.WriteLine(reader["TABLE_NAME"]);
+                        }
+                    }
+                }
                 // Prevents this host process from terminating so services keep running. 
                 Thread.Sleep(Timeout.Infinite);
             }
@@ -42,12 +60,12 @@ namespace TaxiAppWebApi
             }
         }
 
-        public static IHostBuilder CreateHostBuilder() =>
-            Host.CreateDefaultBuilder()
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+        .ConfigureWebHostDefaults(webBuilder =>
+        {
+            webBuilder.UseStartup<Startup>();
+        });
     }
 
 }

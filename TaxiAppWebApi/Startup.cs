@@ -4,6 +4,10 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using TaxiAppWebApi.Data;
+using Microsoft.AspNetCore.Identity;
+using TaxiAppWebApi.Models;
+using Microsoft.Extensions.Options;
+
 
 
 public class Startup
@@ -21,12 +25,21 @@ public class Startup
         services.AddDbContext<TaxiAppDbContext>(options =>
          options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
+        services.AddIdentity<User, IdentityRole>(
+            /*options =>
+            {
+            // Ovdje možeš dodati dodatne opcije za Identity ako je potrebno
+            options.Password.RequireDigit = true;
+            options.Password.RequiredLength = 6;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireLowercase = false;
+        }*/)
+        .AddEntityFrameworkStores<TaxiAppDbContext>()
+        .AddDefaultTokenProviders();
+
         services.AddControllers();
         // Add Swagger services
-        services.AddSwaggerGen(c =>
-        {
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "TaxiAppWebApi", Version = "v1" });
-        });
 
         // Add JWT authentication
         services.AddAuthentication(options =>
@@ -48,10 +61,14 @@ public class Startup
             };
         });
 
+        services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "TaxiAppWebApi", Version = "v1" });
+        });
         // Add CORS policy
         services.AddCors(options =>
         {
-            options.AddPolicy("AllowAllOrigins",
+            options.AddPolicy("AllowAll",
                 builder =>
                 {
                     builder.AllowAnyOrigin()
@@ -60,16 +77,8 @@ public class Startup
                 });
         });
 
-        services.AddCors(options =>
-        {
-            options.AddPolicy("AllowAllOrigins",
-                builder =>
-                {
-                    builder.AllowAnyOrigin()
-                           .AllowAnyMethod()
-                           .AllowAnyHeader();
-                });
-        });
+        //services.AddControllers();
+
 
     }
 
@@ -97,7 +106,7 @@ public class Startup
 
         app.UseRouting();
 
-        app.UseCors("AllowAllOrigins");
+        app.UseCors("AllowAll");
 
         app.UseAuthentication();
         app.UseAuthorization();
